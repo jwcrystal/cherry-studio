@@ -175,7 +175,9 @@ const HomeWindow: FC = () => {
       store.dispatch(newMessagesActions.addMessage({ topicId, message: userMessage }))
       store.dispatch(upsertManyBlocks(blocks))
 
-      const assistant = getDefaultAssistant()
+      // 如果 quickAssistant 未設定，則使用 defaultAssistant
+      const { quickAssistant } = store.getState().assistants
+      const assistant = quickAssistant || getDefaultAssistant()
       let blockId: string | null = null
       let blockContent: string = ''
 
