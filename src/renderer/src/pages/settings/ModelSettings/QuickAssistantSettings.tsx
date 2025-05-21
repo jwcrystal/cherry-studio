@@ -1,11 +1,9 @@
 import { QuestionCircleOutlined } from '@ant-design/icons'
-import { HStack } from '@renderer/components/Layout'
 import { TopView } from '@renderer/components/TopView'
-import { DEFAULT_CONTEXTCOUNT, DEFAULT_MAX_TOKENS, DEFAULT_TEMPERATURE } from '@renderer/config/constant'
+import { DEFAULT_CONTEXTCOUNT, DEFAULT_TEMPERATURE } from '@renderer/config/constant'
 import { useQuickAssistant } from '@renderer/hooks/useAssistant'
 import { AssistantSettings as AssistantSettingsType } from '@renderer/types'
-import { modalConfirm } from '@renderer/utils'
-import { Button, Col, InputNumber, Modal, Row, Slider, Switch, Tooltip } from 'antd'
+import { Button, Col, InputNumber, Modal, Row, Slider, Tooltip } from 'antd'
 import TextArea from 'antd/es/input/TextArea'
 import { Dispatch, FC, SetStateAction, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -17,8 +15,6 @@ const QuickAssistantSettings: FC = () => {
   const { quickAssistant, updateQuickAssistant } = useQuickAssistant()
   const [temperature, setTemperature] = useState(quickAssistant.settings?.temperature ?? DEFAULT_TEMPERATURE)
   const [contextCount, setContextCount] = useState(quickAssistant.settings?.contextCount ?? DEFAULT_CONTEXTCOUNT)
-  const [enableMaxTokens, setEnableMaxTokens] = useState(quickAssistant?.settings?.enableMaxTokens ?? false)
-  const [maxTokens, setMaxTokens] = useState(quickAssistant?.settings?.maxTokens ?? DEFAULT_MAX_TOKENS)
   const [topP, setTopP] = useState(quickAssistant.settings?.topP ?? 1)
 
   const { t } = useTranslation()
@@ -34,8 +30,6 @@ const QuickAssistantSettings: FC = () => {
         ...quickAssistant.settings,
         temperature: settings.temperature ?? temperature,
         contextCount: settings.contextCount ?? contextCount,
-        enableMaxTokens: settings.enableMaxTokens ?? enableMaxTokens,
-        maxTokens: settings.maxTokens ?? maxTokens,
         streamOutput: settings.streamOutput ?? true,
         topP: settings.topP ?? topP
       }
@@ -53,14 +47,14 @@ const QuickAssistantSettings: FC = () => {
   const onContextCountChange = handleChange(setContextCount, (value) =>
     onUpdateAssistantSettings({ contextCount: value })
   )
-  const onMaxTokensChange = handleChange(setMaxTokens, (value) => onUpdateAssistantSettings({ maxTokens: value }))
   const onTopPChange = handleChange(setTopP, (value) => onUpdateAssistantSettings({ topP: value }))
 
   const onReset = () => {
     setTemperature(DEFAULT_TEMPERATURE)
     setContextCount(DEFAULT_CONTEXTCOUNT)
-    setEnableMaxTokens(false)
-    setMaxTokens(0)
+    // 移除 enableMaxTokens 和 maxTokens 的重設
+    // setEnableMaxTokens(false)
+    // setMaxTokens(0)
     setTopP(1)
     updateQuickAssistant({
       ...quickAssistant,
@@ -68,8 +62,6 @@ const QuickAssistantSettings: FC = () => {
         ...quickAssistant.settings,
         temperature: DEFAULT_TEMPERATURE,
         contextCount: DEFAULT_CONTEXTCOUNT,
-        enableMaxTokens: false,
-        maxTokens: DEFAULT_MAX_TOKENS,
         streamOutput: true,
         topP: 1
       }
@@ -111,7 +103,7 @@ const QuickAssistantSettings: FC = () => {
         </Tooltip>
       </Row>
       <Row align="middle" style={{ marginBottom: 10 }} gutter={20}>
-        <Col span={21}>
+        <Col span={20}>
           <Slider
             min={0}
             max={2}
@@ -122,7 +114,7 @@ const QuickAssistantSettings: FC = () => {
             step={0.01}
           />
         </Col>
-        <Col span={3}>
+        <Col span={4}>
           <InputNumber
             min={0}
             max={2}
@@ -140,7 +132,7 @@ const QuickAssistantSettings: FC = () => {
         </Tooltip>
       </Row>
       <Row align="middle" style={{ marginBottom: 10 }} gutter={20}>
-        <Col span={21}>
+        <Col span={20}>
           <Slider
             min={0}
             max={1}
@@ -151,7 +143,7 @@ const QuickAssistantSettings: FC = () => {
             step={0.01}
           />
         </Col>
-        <Col span={3}>
+        <Col span={4}>
           <InputNumber min={0} max={1} step={0.01} value={topP} onChange={onTopPChange} style={{ width: '100%' }} />
         </Col>
       </Row>
@@ -162,7 +154,7 @@ const QuickAssistantSettings: FC = () => {
         </Tooltip>
       </Row>
       <Row align="middle" style={{ marginBottom: 10 }} gutter={20}>
-        <Col span={21}>
+        <Col span={20}>
           <Slider
             min={0}
             max={20}
@@ -173,7 +165,7 @@ const QuickAssistantSettings: FC = () => {
             step={1}
           />
         </Col>
-        <Col span={3}>
+        <Col span={4}>
           <InputNumber
             min={0}
             max={20}
@@ -184,48 +176,6 @@ const QuickAssistantSettings: FC = () => {
           />
         </Col>
       </Row>
-      <Row align="middle" style={{ marginBottom: 10 }}>
-        <HStack>
-          <Label>{t('chat.settings.max_tokens')}</Label>
-          <Tooltip title={t('chat.settings.max_tokens.tip')}>
-            <QuestionIcon />
-          </Tooltip>
-        </HStack>
-        <Switch
-          style={{ marginLeft: 10 }}
-          checked={enableMaxTokens}
-          onChange={async (enabled) => {
-            if (enabled) {
-              const confirmed = await modalConfirm({
-                title: t('chat.settings.max_tokens.confirm'),
-                content: t('chat.settings.max_tokens.confirm_content'),
-                okButtonProps: {
-                  danger: true
-                }
-              })
-              if (!confirmed) return
-            }
-            setEnableMaxTokens(enabled)
-            onUpdateAssistantSettings({ enableMaxTokens: enabled })
-          }}
-        />
-      </Row>
-      {enableMaxTokens && (
-        <Row align="middle" gutter={20}>
-          <Col span={24}>
-            <InputNumber
-              disabled={!enableMaxTokens}
-              min={0}
-              max={10000000}
-              step={100}
-              value={maxTokens}
-              changeOnBlur
-              onChange={onMaxTokensChange}
-              style={{ width: '100%' }}
-            />
-          </Col>
-        </Row>
-      )}
     </SettingContainer>
   )
 }
@@ -257,7 +207,8 @@ const PopupContainer = ({ resolve }: Props) => {
       afterClose={onClose}
       transitionName="animation-move-down"
       centered
-      width={800}
+      // 移除固定的 width 屬性，讓 Modal 自動響應
+      // width={800}
       footer={null}>
       <QuickAssistantSettings />
     </Modal>
