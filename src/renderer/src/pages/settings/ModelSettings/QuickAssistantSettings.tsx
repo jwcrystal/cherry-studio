@@ -52,9 +52,6 @@ const QuickAssistantSettings: FC = () => {
   const onReset = () => {
     setTemperature(DEFAULT_TEMPERATURE)
     setContextCount(DEFAULT_CONTEXTCOUNT)
-    // 移除 enableMaxTokens 和 maxTokens 的重設
-    // setEnableMaxTokens(false)
-    // setMaxTokens(0)
     setTopP(1)
     updateQuickAssistant({
       ...quickAssistant,
@@ -207,8 +204,6 @@ const PopupContainer = ({ resolve }: Props) => {
       afterClose={onClose}
       transitionName="animation-move-down"
       centered
-      // 移除固定的 width 屬性，讓 Modal 自動響應
-      // width={800}
       footer={null}>
       <QuickAssistantSettings />
     </Modal>
