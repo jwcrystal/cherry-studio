@@ -1,0 +1,3 @@
+Image understanding result: {image_description}
+Question: {user_question}
+Please answer the question based on the image information.

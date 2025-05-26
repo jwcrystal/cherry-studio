@@ -1,0 +1,12 @@
+# Project dependencies will be listed here.
+# For now, the project primarily uses the Python standard library.
+
+# Potential future dependencies:
+# openai
+# python-dotenv
+# Flask
+# FastAPI
+# Pillow (for image manipulation if needed locally)
+# transformers (for local models)
+# torch
+# accelerate
